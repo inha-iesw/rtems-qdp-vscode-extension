@@ -36,20 +36,17 @@ export class BuildExecutor {
         this.outputChannel.show();
 
         try {
-            // // 0단계: 파이썬 환경 확인
-            // const isPythonAvailable = await this.checkPythonEnvironment();
-            // if (!isPythonAvailable) {
-            //     // 0-1단계: 파이썬 설치 (make env)
-            //     await this.installPythonEnvironment(qualToolPath);
-            //     this.outputChannel.appendLine('🔧 파이썬 환경이 설치되었습니다.');
-            // }
-            // // 1단계: 파이썬 환경 활성화
-            // const pythonPath = await this.activatePythonEnvironment(qualToolPath);
-            
-            // 2단계: 설정 실행
+            // 0단계: 파이썬 환경 확인
+            const isPythonAvailable = await this.checkPythonEnvironment(qualToolPath);
+            if (!isPythonAvailable) {
+                // 0-1단계: 파이썬 설치 (make env)
+                await this.installPythonEnvironment(qualToolPath);
+                this.outputChannel.appendLine('🔧 파이썬 환경이 설치되었습니다.');
+            }
+            // 1단계: 설정 실행
             await this.executeConfigCommand(qualToolPath, configPath);
-            
-            // 3단계: 빌드 실행
+
+            // 2단계: 빌드 실행
             await this.executeBuildCommand(qualToolPath, config.buildDirectory);
 
             this.outputChannel.appendLine('\n✅ 빌드가 성공적으로 완료되었습니다!');
@@ -58,14 +55,64 @@ export class BuildExecutor {
             throw error;
         }
     }
-    activatePythonEnvironment(qualToolPath: string): Promise<string> {
-        throw new Error('Method not implemented.');
+    private async checkPythonEnvironment(qualToolPath: string): Promise<boolean> {
+        const fs = require('fs').promises;
+        const activatePath = path.join(qualToolPath, 'env', 'bin', 'activate');
+        const isWindows = process.platform === 'win32';
+
+        // Windows의 경우, activate 스크립트 경로 조정
+        const adjustedActivatePath = isWindows
+            ? activatePath.replace(/\//g, '\\')
+            : activatePath;
+
+        try {
+            // activate 스크립트가 존재하는지 확인
+            await fs.access(adjustedActivatePath);
+            return true;
+        } catch {
+            return false;
+        }
     }
-    installPythonEnvironment(qualToolPath: string) {
-        throw new Error('Method not implemented.');
-    }
-    checkPythonEnvironment(): Promise<boolean> {
-        throw new Error('Method not implemented.');
+
+    private async installPythonEnvironment(qualToolPath: string): Promise<void> {
+        const fs = require('fs').promises;
+        const makefilePath = path.join(qualToolPath, 'Makefile');
+
+        // Makefile 존재 확인
+        try {
+            await fs.access(makefilePath);
+        } catch {
+            throw new Error('Makefile이 qual-tool 디렉터리에 없습니다.');
+        }
+
+        this.outputChannel.appendLine('🔧 Python 환경을 설치 중... (make env)');
+
+        return new Promise((resolve, reject) => {
+            const process = spawn('make', ['env'], {
+                cwd: qualToolPath,
+                shell: true,
+            });
+
+            process.stdout.on('data', (data) => {
+                this.outputChannel.append(data.toString());
+            });
+
+            process.stderr.on('data', (data) => {
+                this.outputChannel.append(data.toString());
+            });
+
+            process.on('close', (code) => {
+                if (code === 0) {
+                    resolve();
+                } else {
+                    reject(new Error(`make env 명령어가 실패했습니다 (exit code: ${code})`));
+                }
+            });
+
+            process.on('error', (error) => {
+                reject(new Error(`make env 실행 오류: ${error.message}`));
+            });
+        });
     }
 
     private async executeConfigCommand(qualToolPath: string, configPath: string): Promise<void> {
