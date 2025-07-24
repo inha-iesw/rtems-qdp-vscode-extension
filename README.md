@@ -44,6 +44,7 @@ rtems-qdp-builder/
 ### 1. 설치
 
 ```bash
+# Node JS 설치 필요
 # 의존성 설치
 npm install
 
@@ -70,6 +71,9 @@ VSCode에서 `F5`를 눌러 새로운 Extension Development Host 창을 열고 �
 
 ### 1. 패키징
 ```bash
+# Node JS 설치 필요
+# 의존성 설치
+npm install
 # Extension을 VSIX로 패키징
 npm install -g vsce
 vsce package
