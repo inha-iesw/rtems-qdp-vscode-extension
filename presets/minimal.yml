@@ -1,0 +1,5 @@
+name: "최소 빌드"
+description: "필수 구성 요소만으로 구성된 최소 빌드"
+steps:
+  - steps/build-bsp
+  - steps/build-bsp-qual-only

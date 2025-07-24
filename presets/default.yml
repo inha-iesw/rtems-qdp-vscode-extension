@@ -1,0 +1,10 @@
+name: "기본 빌드"
+description: "표준적인 RTEMS QDP 빌드 구성"
+steps:
+  - steps/build-bsp
+  - steps/build-bsp-qual-only
+  - steps/build-bsp-qual-only-coverage
+  - steps/run-local-target-qual-only
+  - steps/run-local-target-qual-only-coverage
+  - steps/build-ddf-sdd
+  - steps/build-djf-svr

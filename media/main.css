@@ -1,0 +1,444 @@
+/* 전체 스타일 */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    padding: 16px;
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
+    line-height: 1.5;
+}
+
+#app {
+    max-width: 100%;
+}
+
+/* 헤더 */
+header {
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--vscode-widget-border);
+    padding-bottom: 16px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--vscode-foreground);
+}
+
+/* 섹션 스타일 */
+section {
+    margin-bottom: 24px;
+    padding: 16px;
+    background-color: var(--vscode-editor-inactiveSelectionBackground);
+    border-radius: 8px;
+    border: 1px solid var(--vscode-widget-border);
+}
+
+section h2 {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--vscode-foreground);
+}
+
+/* 폼 그룹 */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+    color: var(--vscode-foreground);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--vscode-input-border);
+    border-radius: 4px;
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--vscode-focusBorder);
+    box-shadow: 0 0 0 1px var(--vscode-focusBorder);
+}
+
+.field-help {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground);
+    font-style: italic;
+}
+
+/* 버튼 스타일 */
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    display: inline-block;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn-primary {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+}
+
+.btn-primary:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+.btn-secondary {
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+}
+
+.btn-secondary:hover {
+    background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+/* 프리셋 컨트롤 */
+.preset-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.preset-controls select {
+    padding: 8px 12px;
+    border: 1px solid var(--vscode-input-border);
+    border-radius: 4px;
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    font-size: 14px;
+    min-width: 200px;
+}
+
+/* 모달 스타일 */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    /* 기본적으로 숨김 */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background-color: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-widget-border);
+    border-radius: 8px;
+    padding: 24px;
+    min-width: 400px;
+    max-width: 90vw;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-content h3 {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--vscode-foreground);
+}
+
+.modal-content p {
+    margin: 0 0 16px 0;
+    color: var(--vscode-foreground);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.btn-danger {
+    background-color: #f14c4c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #d93636;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+/* 빌드 스텝 스타일 */
+.category-group {
+    margin-bottom: 20px;
+}
+
+.category-group h3 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--vscode-foreground);
+    padding: 8px 0;
+    border-bottom: 1px solid var(--vscode-widget-border);
+}
+
+.steps-group {
+    display: grid;
+    gap: 8px;
+    padding-left: 16px;
+}
+
+.step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--vscode-widget-border);
+}
+
+.step-item:last-child {
+    border-bottom: none;
+}
+
+.step-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 2px 0 0 0;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.step-item label {
+    margin: 0;
+    cursor: pointer;
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.4;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.step-item label:hover {
+    color: var(--vscode-textLink-foreground);
+}
+
+.step-name {
+    font-weight: 600;
+    color: var(--vscode-foreground);
+}
+
+.step-description {
+    color: var(--vscode-descriptionForeground);
+    font-size: 13px;
+}
+
+.step-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 2px;
+}
+
+.step-time,
+.step-tags,
+.step-dependencies {
+    font-size: 11px;
+    color: var(--vscode-descriptionForeground);
+    background-color: var(--vscode-badge-background);
+    padding: 2px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+}
+
+.step-time {
+    color: var(--vscode-charts-orange);
+}
+
+.step-tags {
+    color: var(--vscode-charts-blue);
+}
+
+.step-dependencies {
+    color: var(--vscode-charts-purple);
+    cursor: help;
+}
+
+/* 액션 섹션 */
+.actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+/* 상태 메시지 */
+.status-message {
+    padding: 12px;
+    border-radius: 4px;
+    margin-top: 16px;
+    font-weight: 500;
+}
+
+.status-message.info {
+    background-color: var(--vscode-editorInfo-background);
+    color: var(--vscode-editorInfo-foreground);
+    border-left: 4px solid var(--vscode-editorInfo-border);
+}
+
+.status-message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+}
+
+.status-message.error {
+    background-color: var(--vscode-editorError-background);
+    color: var(--vscode-editorError-foreground);
+    border-left: 4px solid var(--vscode-editorError-border);
+}
+
+/* 환경 상태
+.environment-check {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+} */
+
+.status-ok {
+    color: #28a745;
+    font-weight: 500;
+}
+
+.status-error {
+    color: var(--vscode-editorError-foreground);
+}
+
+.status-error ul {
+    margin: 8px 0 0 0;
+    padding-left: 20px;
+}
+
+.status-error li {
+    margin-bottom: 4px;
+}
+
+/* 스크롤바 */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--vscode-scrollbarSlider-background);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--vscode-scrollbarSlider-hoverBackground);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--vscode-scrollbarSlider-activeBackground);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 600px) {
+    .preset-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .preset-controls select {
+        min-width: auto;
+        width: 100%;
+    }
+
+    .actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+        margin-right: 0;
+    }
+}
+
+/* 접근성 개선 */
+.btn:focus,
+input:focus,
+select:focus {
+    outline: 2px solid var(--vscode-focusBorder);
+    outline-offset: 2px;
+}
+
+/* 다크 테마 추가 지원 */
+@media (prefers-color-scheme: dark) {
+    .btn-success {
+        background-color: #198754;
+    }
+
+    .btn-success:hover {
+        background-color: #157347;
+    }
+}

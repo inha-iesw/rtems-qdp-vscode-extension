@@ -1,0 +1,683 @@
+# RTEMS QDP Builder - Build Steps Configuration
+# 실제 RTEMS QDP config 구조에 맞춘 빌드 스텝 정의
+
+categories:
+  - id: repository
+    name: Repository
+    description: 소스 코드 저장소 클론 및 초기 설정
+    icon: 📦
+    config_path: repos/
+
+  - id: setup
+    name: Setup
+    description: 빌드 환경 설정 및 도구 준비
+    icon: 🔧
+    config_path: setup/
+
+  - id: core_build
+    name: Core Build
+    description: 핵심 BSP 및 시스템 컴포넌트 빌드
+    icon: 🏗️
+    config_path: steps/
+
+  - id: qualification
+    name: Qualification
+    description: 자격 검증 관련 빌드 및 테스트
+    icon: ✅
+    config_path: steps/
+
+  - id: test_execution
+    name: Test Execution
+    description: 각종 플랫폼에서의 테스트 실행
+    icon: 🧪
+    config_path: steps/
+
+  - id: documentation
+    name: Documentation
+    description: 기술 문서 및 매뉴얼 생성
+    icon: 📚
+    config_path: steps/
+
+  - id: verification
+    name: Verification
+    description: 소프트웨어 검증 및 보고서 생성
+    icon: 🔍
+    config_path: steps/
+
+  - id: technical_notes
+    name: Technical Notes
+    description: 기술 노트 및 가이드 문서
+    icon: 📝
+    config_path: steps/
+
+  - id: management
+    name: Management
+    description: 프로젝트 관리 문서
+    icon: 📋
+    config_path: steps/
+
+  - id: process_assurance
+    name: Process Assurance
+    description: 프로세스 보증 관련 문서
+    icon: 🛡️
+    config_path: steps/
+
+  - id: formal_methods
+    name: Formal Methods
+    description: 형식 검증 관련 작업
+    icon: 🔬
+    config_path: steps/
+
+  - id: isvv
+    name: ISVV
+    description: 독립 소프트웨어 검증 및 검증
+    icon: 🔒
+    config_path: steps/
+
+  - id: tools
+    name: Tools
+    description: 개발 및 검증 도구
+    icon: 🛠️
+    config_path: steps/
+
+  - id: examples
+    name: Examples
+    description: 예제 코드 및 샘플
+    icon: 💡
+    config_path: dirs/
+
+  - id: package
+    name: Package
+    description: 최종 패키징 및 배포
+    icon: 📤
+    config_path: steps/
+
+build-steps:
+  # Repository & Setup (repos/ 디렉토리 기반)
+  - uid: steps/clone-esa-main
+    name: ESA Main Clone
+    description: ESA 메인 저장소를 클론하여 기본 소스 코드를 가져옵니다
+    category: repository
+    is_default: false
+    tags: [clone, repository, esa]
+    estimated_time: "2-5분"
+    dependencies: []
+    config_file: repos/esa-main.yml
+    config_fields: [repository-url, branch, clone-path]
+
+  - uid: steps/clone-rsb
+    name: RSB Clone
+    description: RTEMS Source Builder 저장소를 클론합니다
+    category: repository
+    is_default: false
+    tags: [clone, rsb, rtems]
+    estimated_time: "3-7분"
+    dependencies: []
+    config_file: repos/rsb.yml
+    config_fields: [repository-url, clone-depth, target-directory]
+
+  - uid: steps/clone-rtems
+    name: RTEMS Clone
+    description: RTEMS 핵심 소스 코드 저장소를 클론합니다
+    category: repository
+    is_default: false
+    tags: [clone, rtems, core]
+    estimated_time: "5-10분"
+    dependencies: []
+    config_file: repos/rtems.yml
+    config_fields: [repository-url, branch, submodules]
+
+  - uid: steps/clone-rtems-docs
+    name: RTEMS Docs Clone
+    description: RTEMS 공식 문서 저장소를 클론합니다
+    category: repository
+    is_default: false
+    tags: [clone, docs, documentation]
+    estimated_time: "2-4분"
+    dependencies: []
+    config_file: repos/rtems-docs.yml
+    config_fields: [repository-url, docs-format]
+
+  - uid: steps/clone-rtems-tools
+    name: RTEMS Tools Clone
+    description: RTEMS 개발 도구 저장소를 클론합니다
+    category: repository
+    is_default: false
+    tags: [clone, tools]
+    estimated_time: "3-6분"
+    dependencies: []
+    config_file: repos/rtems-tools.yml
+    config_fields: [repository-url, tools-list]
+
+  - uid: steps/run-rsb
+    name: Run RSB
+    description: RTEMS Source Builder를 실행하여 개발 환경을 구축합니다
+    category: setup
+    is_default: false
+    tags: [setup, environment, rsb]
+    estimated_time: "30-60분"
+    dependencies: [steps/clone-rsb]
+    config_file: steps/run-rsb.yml
+    config_fields: [commands, build-target, install-prefix]
+
+  # Core Build Steps (steps/ 디렉토리 기반)
+  - uid: steps/build-bsp
+    name: Build BSP
+    description: Board Support Package를 빌드합니다
+    category: core_build
+    is_default: true
+    tags: [build, bsp, hardware]
+    estimated_time: "15-30분"
+    dependencies: []
+    config_file: steps/build-bsp.yml
+    config_fields: [commands, bsp-target, compiler-flags]
+
+  - uid: steps/build-bsp-coverage
+    name: Build BSP Coverage
+    description: BSP 커버리지 분석을 위한 빌드를 수행합니다
+    category: core_build
+    is_default: false
+    tags: [build, coverage, analysis]
+    estimated_time: "20-40분"
+    dependencies: [steps/build-bsp]
+    config_file: steps/build-bsp-coverage.yml
+    config_fields: [commands, coverage-flags, output-format]
+
+  - uid: steps/build-bsp-analyzer
+    name: Build BSP Analyzer
+    description: BSP 정적 분석 도구를 빌드합니다
+    category: core_build
+    is_default: false
+    tags: [build, static-analysis, quality]
+    estimated_time: "10-20분"
+    dependencies: [steps/build-bsp]
+    config_file: steps/build-bsp-analyzer.yml
+    config_fields: [commands, analyzer-tools, report-format]
+
+  # Qualification Steps (steps/ 디렉토리 기반)
+  - uid: steps/qual-only
+    name: Qualification Only
+    description: 자격 검증 전용 빌드를 수행합니다
+    category: qualification
+    is_default: false
+    tags: [qualification, verify]
+    estimated_time: "20-45분"
+    dependencies: []
+    config_file: steps/qual-only.yml
+    config_fields: [commands, qual-standards, verification-level]
+
+  - uid: steps/build-bsp-qual-only
+    name: Build BSP Qual Only
+    description: BSP 자격 검증 전용 빌드를 수행합니다
+    category: qualification
+    is_default: true
+    tags: [build, qualification, bsp]
+    estimated_time: "25-50분"
+    dependencies: [steps/build-bsp]
+    config_file: steps/build-bsp-qual-only.yml
+    config_fields: [commands, qual-flags, certification-level]
+
+  - uid: steps/build-bsp-qual-only-coverage
+    name: Build BSP Qual Coverage
+    description: BSP 자격 검증 커버리지 분석 빌드를 수행합니다
+    category: qualification
+    is_default: true
+    tags: [qualification, coverage, analysis]
+    estimated_time: "30-60분"
+    dependencies: [steps/build-bsp-qual-only]
+    config_file: steps/build-bsp-qual-only-coverage.yml
+    config_fields: [commands, coverage-target, report-path]
+
+  - uid: steps/build-bsp-qual-only-analyzer
+    name: Build BSP Qual Analyzer
+    description: BSP 자격 검증 정적 분석 도구를 빌드합니다
+    category: qualification
+    is_default: false
+    tags: [qualification, static-analysis]
+    estimated_time: "15-30분"
+    dependencies: [steps/build-bsp-qual-only]
+    config_file: steps/build-bsp-qual-only-analyzer.yml
+    config_fields: [commands, analysis-rules, output-directory]
+
+  # Test Execution (steps/ 디렉토리 기반)
+  - uid: steps/run-local-target-qual-only
+    name: Run Local Target Qual
+    description: 로컬 타겟에서 자격 검증 테스트를 실행합니다
+    category: test_execution
+    is_default: true
+    tags: [test, local, qualification]
+    estimated_time: "45-90분"
+    dependencies: [steps/build-bsp-qual-only]
+    config_file: steps/run-local-target-qual-only.yml
+    config_fields:
+      [
+        commands,
+        config-directory,
+        config-file,
+        config-variant,
+        executables-directory,
+      ]
+
+  - uid: steps/run-local-target-qual-only-coverage
+    name: Run Local Target Qual Coverage
+    description: 로컬 타겟에서 자격 검증 커버리지 테스트를 실행합니다
+    category: test_execution
+    is_default: true
+    tags: [test, coverage, local]
+    estimated_time: "60-120분"
+    dependencies: [steps/build-bsp-qual-only-coverage]
+    config_file: steps/run-local-target-qual-only-coverage.yml
+    config_fields: [commands, coverage-config, report-format]
+
+  - uid: steps/run-local-board-target-qual-only
+    name: Run Local Board Target Qual
+    description: 로컬 하드웨어 보드에서 자격 검증 테스트를 실행합니다
+    category: test_execution
+    is_default: false
+    tags: [test, hardware, board]
+    estimated_time: "30-60분"
+    dependencies: [steps/build-bsp-qual-only]
+    config_file: steps/run-local-board-target-qual-only.yml
+    config_fields: [commands, board-config, target-hardware]
+
+  - uid: steps/run-local-board-target-qual-only-coverage
+    name: Run Local Board Target Qual Coverage
+    description: 로컬 보드에서 자격 검증 커버리지 테스트를 실행합니다
+    category: test_execution
+    is_default: false
+    tags: [test, coverage, hardware]
+    estimated_time: "45-90분"
+    dependencies: [steps/run-local-board-target-qual-only]
+    config_file: steps/run-local-board-target-qual-only-coverage.yml
+    config_fields: [commands, hardware-coverage, test-suite]
+
+  - uid: steps/run-esa-platform-qual-only
+    name: Run ESA Platform Qual
+    description: ESA 플랫폼에서 자격 검증 테스트를 실행합니다
+    category: test_execution
+    is_default: false
+    tags: [test, esa, platform]
+    estimated_time: "60-120분"
+    dependencies: [steps/build-bsp-qual-only]
+    config_file: steps/run-esa-platform-qual-only.yml
+    config_fields: [commands, esa-config, platform-specific]
+
+  - uid: steps/run-esa-platform-qual-only-coverage
+    name: Run ESA Platform Qual Coverage
+    description: ESA 플랫폼에서 자격 검증 커버리지 테스트를 실행합니다
+    category: test_execution
+    is_default: false
+    tags: [test, coverage, esa]
+    estimated_time: "90-180분"
+    dependencies: [steps/run-esa-platform-qual-only]
+    config_file: steps/run-esa-platform-qual-only-coverage.yml
+    config_fields: [commands, esa-coverage, space-validation]
+
+  # Documentation Build (steps/ 디렉토리 기반)
+  - uid: steps/build-pre-ddf-sdd
+    name: Build Pre-DDF SDD
+    description: DDF-SDD 문서 생성을 위한 사전 준비 작업을 수행합니다
+    category: documentation
+    is_default: false
+    tags: [docs, preparation, ddf]
+    estimated_time: "10-20분"
+    dependencies: []
+    config_file: steps/build-pre-ddf-sdd.yml
+    config_fields: [commands, template-path, output-directory]
+
+  - uid: steps/build-ddf-sdd
+    name: Build DDF-SDD
+    description: Detailed Design Document - Software Design Document를 생성합니다
+    category: documentation
+    is_default: true
+    tags: [docs, design, specification]
+    estimated_time: "20-40분"
+    dependencies: []
+    config_file: steps/build-ddf-sdd.yml
+    config_fields: [commands, document-format, output-path]
+
+  - uid: steps/build-ddf-sdd-part0
+    name: Build DDF-SDD Part0
+    description: DDF-SDD 문서의 파트 0 섹션을 생성합니다
+    category: documentation
+    is_default: false
+    tags: [docs, ddf, part0]
+    estimated_time: "15-30분"
+    dependencies: [steps/build-pre-ddf-sdd]
+    config_file: steps/build-ddf-sdd-part0.yml
+    config_fields: [commands, part0-template, section-config]
+
+  - uid: steps/build-ddf-sreld
+    name: Build DDF-SRELD
+    description: Software Requirements - End of Life Document를 생성합니다
+    category: documentation
+    is_default: false
+    tags: [docs, requirements, eol]
+    estimated_time: "25-45분"
+    dependencies: []
+    config_file: steps/build-ddf-sreld.yml
+    config_fields: [commands, requirements-spec, eol-criteria]
+
+  - uid: steps/build-ts-srs
+    name: Build TS-SRS
+    description: Test Suite - Software Requirements Specification을 생성합니다
+    category: documentation
+    is_default: false
+    tags: [docs, test, requirements]
+    estimated_time: "30-60분"
+    dependencies: []
+    config_file: steps/build-ts-srs.yml
+    config_fields: [commands, test-spec, requirements-mapping]
+
+  - uid: steps/build-ts-icd
+    name: Build TS-ICD
+    description: Test Suite - Interface Control Document를 생성합니다
+    category: documentation
+    is_default: false
+    tags: [docs, interface, control]
+    estimated_time: "20-40분"
+    dependencies: []
+    config_file: steps/build-ts-icd.yml
+    config_fields: [commands, interface-spec, control-matrix]
+
+  - uid: steps/build-rtems-docs
+    name: Build RTEMS Docs
+    description: RTEMS 공식 문서 및 API 레퍼런스를 생성합니다
+    category: documentation
+    is_default: false
+    tags: [docs, rtems, api]
+    estimated_time: "40-80분"
+    dependencies: [steps/clone-rtems-docs]
+    config_file: steps/build-rtems-docs.yml
+    config_fields: [commands, docs-format, api-coverage]
+
+  # Verification Documents (steps/ 디렉토리 기반)
+  - uid: steps/build-djf-svs
+    name: Build DJF-SVS
+    description: Software Verification Specification 문서를 생성합니다
+    category: verification
+    is_default: false
+    tags: [verification, specification]
+    estimated_time: "25-50분"
+    dependencies: []
+    config_file: steps/build-djf-svs.yml
+    config_fields: [commands, verification-spec, test-matrix]
+
+  - uid: steps/build-djf-suitp
+    name: Build DJF-SUITP
+    description: Software Unit Integration Test Procedures를 생성합니다
+    category: verification
+    is_default: false
+    tags: [verification, integration, test]
+    estimated_time: "30-60분"
+    dependencies: []
+    config_file: steps/build-djf-suitp.yml
+    config_fields: [commands, integration-spec, test-procedures]
+
+  - uid: steps/build-djf-svr
+    name: Build DJF-SVR
+    description: Software Verification Report - 소프트웨어 검증 보고서를 생성합니다
+    category: verification
+    is_default: true
+    tags: [verification, report]
+    estimated_time: "35-70분"
+    dependencies: []
+    config_file: steps/build-djf-svr.yml
+    config_fields: [commands, config-file, test-log-files, verification-results]
+
+  - uid: steps/build-djf-srf
+    name: Build DJF-SRF
+    description: Software Release File - 소프트웨어 릴리스 파일을 생성합니다
+    category: verification
+    is_default: false
+    tags: [verification, release]
+    estimated_time: "15-30분"
+    dependencies: []
+    config_file: steps/build-djf-srf.yml
+    config_fields: [commands, release-spec, version-info]
+
+  # Technical Notes (steps/ 디렉토리 기반)
+  - uid: steps/build-tn-ti
+    name: Build TN-TI
+    description: Technical Note - Tool Installation 가이드를 생성합니다
+    category: technical_notes
+    is_default: false
+    tags: [technical-note, installation]
+    estimated_time: "15-25분"
+    dependencies: []
+    config_file: steps/build-tn-ti.yml
+    config_fields: [commands, tool-list, install-procedures]
+
+  - uid: steps/build-tn-qt
+    name: Build TN-QT
+    description: Technical Note - Qualification Tools 가이드를 생성합니다
+    category: technical_notes
+    is_default: false
+    tags: [technical-note, qualification]
+    estimated_time: "20-35분"
+    dependencies: []
+    config_file: steps/build-tn-qt.yml
+    config_fields: [commands, qual-tools, usage-guide]
+
+  - uid: steps/build-tn-sp
+    name: Build TN-SP
+    description: Technical Note - Software Platform 가이드를 생성합니다
+    category: technical_notes
+    is_default: false
+    tags: [technical-note, platform]
+    estimated_time: "25-45분"
+    dependencies: []
+    config_file: steps/build-tn-sp.yml
+    config_fields: [commands, platform-spec, architecture-guide]
+
+  # Management Documents (steps/ 디렉토리 기반)
+  - uid: steps/build-mgt-scmp
+    name: Build MGT-SCMP
+    description: Software Configuration Management Plan을 생성합니다
+    category: management
+    is_default: false
+    tags: [management, configuration]
+    estimated_time: "30-50분"
+    dependencies: []
+    config_file: steps/build-mgt-scmp.yml
+    config_fields: [commands, config-management, version-control]
+
+  - uid: steps/build-mgt-sdp
+    name: Build MGT-SDP
+    description: Software Development Plan - 소프트웨어 개발 계획서를 생성합니다
+    category: management
+    is_default: false
+    tags: [management, development]
+    estimated_time: "40-70분"
+    dependencies: []
+    config_file: steps/build-mgt-sdp.yml
+    config_fields: [commands, development-plan, lifecycle-model]
+
+  - uid: steps/build-mgt-srevp
+    name: Build MGT-SREVP
+    description: Software Review and Evaluation Plan을 생성합니다
+    category: management
+    is_default: false
+    tags: [management, review]
+    estimated_time: "25-45분"
+    dependencies: []
+    config_file: steps/build-mgt-srevp.yml
+    config_fields: [commands, review-process, evaluation-criteria]
+
+  # Process Assurance (steps/ 디렉토리 기반)
+  - uid: steps/build-paf-spap
+    name: Build PAF-SPAP
+    description: Software Process Assurance Plan을 생성합니다
+    category: process_assurance
+    is_default: false
+    tags: [process, assurance]
+    estimated_time: "35-60분"
+    dependencies: []
+    config_file: steps/build-paf-spap.yml
+    config_fields: [commands, process-standards, assurance-activities]
+
+  - uid: steps/build-paf-spamr
+    name: Build PAF-SPAMR
+    description: Software Process Assurance Monitoring Report를 생성합니다
+    category: process_assurance
+    is_default: false
+    tags: [process, monitoring]
+    estimated_time: "20-40분"
+    dependencies: []
+    config_file: steps/build-paf-spamr.yml
+    config_fields: [commands, monitoring-data, compliance-report]
+
+  # Formal Methods (steps/ 디렉토리 기반)
+  - uid: steps/build-fm-fvp
+    name: Build FM-FVP
+    description: Formal Verification Plan - 형식 검증 계획서를 생성합니다
+    category: formal_methods
+    is_default: false
+    tags: [formal, verification, plan]
+    estimated_time: "45-80분"
+    dependencies: []
+    config_file: steps/build-fm-fvp.yml
+    config_fields: [commands, formal-methods, verification-scope]
+
+  - uid: steps/build-fm-fva
+    name: Build FM-FVA
+    description: Formal Verification Activities - 형식 검증 활동 문서를 생성합니다
+    category: formal_methods
+    is_default: false
+    tags: [formal, verification, activities]
+    estimated_time: "50-90분"
+    dependencies: [steps/build-fm-fvp]
+    config_file: steps/build-fm-fva.yml
+    config_fields: [commands, verification-activities, proof-obligations]
+
+  - uid: steps/build-fm-fvr
+    name: Build FM-FVR
+    description: Formal Verification Report - 형식 검증 보고서를 생성합니다
+    category: formal_methods
+    is_default: false
+    tags: [formal, verification, report]
+    estimated_time: "30-55분"
+    dependencies: [steps/build-fm-fva]
+    config_file: steps/build-fm-fvr.yml
+    config_fields: [commands, verification-results, formal-proof]
+
+  # ISVV & Tools (steps/ 디렉토리 기반)
+  - uid: steps/build-ISVV-docs
+    name: Build ISVV Docs
+    description: Independent Software Verification & Validation 문서를 생성합니다
+    category: isvv
+    is_default: false
+    tags: [isvv, independent, validation]
+    estimated_time: "60-120분"
+    dependencies: []
+    config_file: steps/build-ISVV-docs.yml
+    config_fields: [commands, isvv-plan, independence-criteria]
+
+  - uid: steps/issue-retriever
+    name: Issue Retriever
+    description: 이슈 추적 시스템에서 이슈를 수집하고 분류하는 도구를 실행합니다
+    category: tools
+    is_default: false
+    tags: [tools, issues, tracking]
+    estimated_time: "10-20분"
+    dependencies: []
+    config_file: steps/issue-retriever.yml
+    config_fields: [commands, issue-tracker-url, filter-criteria]
+
+  - uid: steps/copy-qual-tool
+    name: Copy Qual Tool
+    description: 자격 검증 도구들을 배포 위치로 복사합니다
+    category: tools
+    is_default: false
+    tags: [tools, qualification, deployment]
+    estimated_time: "5-10분"
+    dependencies: []
+    config_file: dirs/qual-tools.yml
+    config_fields: [source-directory, target-directory, tool-list]
+
+  # Examples & Package (dirs/ 디렉토리 기반)
+  - uid: steps/copy-example
+    name: Copy Example
+    description: C 언어 예제 코드와 샘플 프로젝트를 복사합니다
+    category: examples
+    is_default: false
+    tags: [examples, c, samples]
+    estimated_time: "5-10분"
+    dependencies: []
+    config_file: dirs/example-c.yml
+    config_fields: [source-directory, target-directory, example-list]
+
+  - uid: steps/copy-example-cxx
+    name: Copy Example C++
+    description: C++ 예제 코드와 샘플 프로젝트를 복사합니다
+    category: examples
+    is_default: false
+    tags: [examples, cpp, samples]
+    estimated_time: "5-10분"
+    dependencies: []
+    config_file: dirs/example-cxx.yml
+    config_fields: [source-directory, target-directory, cpp-examples]
+
+  - uid: steps/archive
+    name: Archive
+    description: 모든 빌드 결과물을 압축하여 최종 아카이브를 생성합니다
+    category: package
+    is_default: false
+    tags: [package, archive, deployment]
+    estimated_time: "10-25분"
+    dependencies: []
+    config_file: steps/archive.yml
+    config_fields: [commands, archive-format, output-path]
+
+  - uid: steps/build-package-manual
+    name: Build Package Manual
+    description: 패키지 사용법 및 설치 매뉴얼을 생성합니다
+    category: package
+    is_default: false
+    tags: [package, manual, documentation]
+    estimated_time: "20-35분"
+    dependencies: []
+    config_file: steps/build-package-manual.yml
+    config_fields: [commands, manual-template, package-info]
+
+# 기본 프리셋 (default)
+default_build_steps:
+  - steps/build-bsp
+  - steps/build-bsp-qual-only
+  - steps/build-bsp-qual-only-coverage
+  - steps/run-local-target-qual-only
+  - steps/run-local-target-qual-only-coverage
+  - steps/build-ddf-sdd
+  - steps/build-djf-svr
+
+# RTEMS QDP 시스템 메타데이터
+metadata:
+  rtems_qdp_version: "6.1"
+  config_structure_version: "2.0"
+  spec_paths:
+    - spec-spec
+    - spec-glossary
+    - config
+
+  # config 디렉토리 구조
+  config_directories:
+    - dirs/ # 디렉토리 설정들
+    - repos/ # 저장소 설정들
+    - spec/ # 스펙 파일들
+    - steps/ # 빌드 스텝들
+
+  # 주요 설정 파일들
+  main_config_files:
+    - variant.yml # 주요 변수 및 변형 정의
+    - package-build.yml # 패키지 빌드 링크 정의
+    - rtems-spec.yml # RTEMS 스펙 정의
+    - glossary-general.yml # 일반 용어집
+
+  # 치환 표현식 예시
+  substitution_examples:
+    - "${/variant:/build-directory}" # 루트의 variant.yml에서 build-directory 필드
+    - "${../variant:/deployment-directory}" # 상위 디렉토리의 variant.yml에서 deployment-directory 필드
+    - "${.:config-directory}" # 현재 파일의 config-directory 필드
+    - "${.:config-file}" # 현재 파일의 config-file 필드
+    - "${.:config-variant}" # 현재 파일의 config-variant 필드
+    - "${.:executables-directory}" # 현재 파일의 executables-directory 필드
