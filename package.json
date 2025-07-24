@@ -2,6 +2,10 @@
   "name": "rtems-qdp-builder",
   "displayName": "RTEMS QDP Builder",
   "description": "RTEMS QDP 빌드 과정을 자동화하는 VSCode Extension",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/inha-iesw/rtems-qdp-vscode-extension"
+  },
   "version": "1.0.0",
   "engines": {
     "vscode": "^1.74.0"
