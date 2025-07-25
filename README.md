@@ -356,6 +356,7 @@ Extension UI에서 직접 프리셋을 저장하고 관리할 수 있습니다:
 - ✏️: Fix typos.
 - 📝: Add or Update the documentation / comments.
 - 🔥: Remove code or files.
+- 🚀: Deploy stuff.
 
 ## 📄 라이선스
 
