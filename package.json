@@ -2,6 +2,11 @@
   "name": "rtems-qdp-builder",
   "displayName": "RTEMS QDP Builder",
   "description": "RTEMS QDP 빌드 과정을 자동화하는 VSCode Extension",
+  "publisher": "inha-iesw-lab",
+  "author": {
+    "name": "Inha IESW Lab",
+    "email": "iesw.inha@gmail.com"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/inha-iesw/rtems-qdp-vscode-extension"

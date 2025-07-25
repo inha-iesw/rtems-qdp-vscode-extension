@@ -1,0 +1,61 @@
+# Source files
+src/**
+tsconfig.json
+.eslintrc.json
+
+# Development files
+.vscode/**
+.vscode-test/**
+node_modules/**
+.gitignore
+.github/**
+
+# Build artifacts
+*.vsix
+
+# Documentation (optional - 포함하려면 제거)
+# README.md
+# CHANGELOG.md
+
+# Test files
+test/**
+*.test.ts
+*.test.js
+
+# Config files
+.eslintrc*
+.prettier*
+webpack.config.js
+rollup.config.js
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/

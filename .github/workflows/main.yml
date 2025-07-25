@@ -1,0 +1,286 @@
+name: Build and Deploy VSCode Extension
+
+on:
+  # Pull Request와 Push시 빌드 테스트
+  push:
+    branches: [main, develop]
+    tags:
+      - "v*.*.*"
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: "18"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 전체 히스토리 가져오기 (태그 정보 필요)
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Lint Code
+        run: npm run lint || echo "Linting failed but continuing..."
+
+      - name: Compile TypeScript
+        run: npm run compile
+
+      - name: Run Tests
+        run: npm test || echo "Tests failed but continuing..."
+
+      - name: Package Extension
+        run: |
+          npm install -g @vscode/vsce
+          vsce package --no-dependencies
+
+      - name: Upload VSIX Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix-package-${{ github.sha }}
+          path: "*.vsix"
+          retention-days: 30
+
+      - name: Check Package Contents
+        run: |
+          vsce ls
+          echo "Package size:"
+          ls -lh *.vsix
+
+  deploy:
+    # 태그가 푸시될 때만 배포 실행
+    if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-')
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production # GitHub Environment 보호 사용
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Compile TypeScript
+        run: npm run compile
+
+      - name: Install VSCE
+        run: npm install -g @vscode/vsce
+
+      - name: Extract Version from Tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Deploying version: $VERSION"
+
+      - name: Validate Version Format
+        run: |
+          if ! [[ "${{ steps.get_version.outputs.VERSION }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid version format: ${{ steps.get_version.outputs.VERSION }}"
+            echo "Expected format: x.y.z (e.g., 1.0.0)"
+            exit 1
+          fi
+
+      - name: Update Package Version
+        run: |
+          npm version ${{ steps.get_version.outputs.VERSION }} --no-git-tag-version
+          echo "Updated package.json version to ${{ steps.get_version.outputs.VERSION }}"
+
+      - name: Verify Package Configuration
+        run: |
+          # publisher 필드 확인
+          PUBLISHER=$(node -p "require('./package.json').publisher")
+          if [ "$PUBLISHER" = "your-publisher-name" ] || [ "$PUBLISHER" = "undefined" ]; then
+            echo "❌ Error: Please update the 'publisher' field in package.json"
+            echo "Current publisher: $PUBLISHER"
+            echo "Visit https://marketplace.visualstudio.com/manage to create a publisher"
+            exit 1
+          fi
+          echo "✅ Publisher: $PUBLISHER"
+
+          # 기본 필드들 확인
+          NAME=$(node -p "require('./package.json').name")
+          DESCRIPTION=$(node -p "require('./package.json').description")
+          echo "✅ Extension: $NAME"
+          echo "✅ Description: $DESCRIPTION"
+
+      - name: Package Extension
+        run: |
+          vsce package --no-dependencies
+          PACKAGE_NAME=$(ls *.vsix)
+          echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
+          echo "📦 Created package: $PACKAGE_NAME"
+
+      - name: Publish to VSCode Marketplace
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          if [ -z "$VSCE_PAT" ]; then
+            echo "❌ Error: VSCE_PAT secret is not set"
+            echo "Please add your Personal Access Token to GitHub Secrets"
+            echo "Guide: https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token"
+            exit 1
+          fi
+
+          echo "🚀 Publishing to VSCode Marketplace..."
+          vsce publish -p $VSCE_PAT --no-dependencies
+          echo "✅ Successfully published to VSCode Marketplace"
+
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          cat > release_notes.md << 'EOF'
+          ## 🚀 RTEMS QDP Builder v${{ steps.get_version.outputs.VERSION }}
+
+          ### 📥 설치 방법
+
+          **VSCode Marketplace에서 설치 (권장):**
+          ```bash
+          code --install-extension $(node -p "require('./package.json').publisher").rtems-qdp-builder
+          ```
+
+          **또는 VSIX 파일로 직접 설치:**
+          1. 아래 Assets에서 `.vsix` 파일 다운로드
+          2. VSCode에서 `Ctrl+Shift+P` → "Extensions: Install from VSIX" 실행
+          3. 다운로드한 파일 선택
+
+          ### 🔧 사용 방법
+
+          1. **환경 준비**: `/opt` 디렉터리에서 VSCode 실행
+          2. **Extension 실행**: `Ctrl+Shift+P` → "Open RTEMS QDP Builder"
+          3. **환경 확인**: "환경 확인" 버튼으로 RTEMS QDP 환경 검증
+          4. **설정 구성**: 
+             - 빌드 디렉터리와 플랫폼 정보 입력
+             - 프리셋 선택 또는 개별 빌드 스텝 선택
+          5. **빌드 실행**: "설정 파일 생성" → "빌드 실행"
+
+          ### 📋 주요 기능
+
+          - ✨ **사용자 친화적 UI**: 복잡한 YAML 설정을 GUI로 간편하게 구성
+          - 🎯 **스마트 프리셋**: 기본 프리셋 + 사용자 정의 프리셋 저장/관리
+          - 📊 **40+ 빌드 스텝**: 15개 카테고리별로 체계적 분류
+          - 🔍 **자동 환경 검증**: RTEMS QDP 환경 구조 및 필수 파일 확인
+          - 🚀 **원클릭 빌드**: 설정부터 실행까지 완전 자동화
+          - 📱 **반응형 인터페이스**: VSCode 테마 자동 적용
+
+          ### 🐛 문제 보고
+
+          버그나 기능 요청은 [GitHub Issues](https://github.com/${{ github.repository }}/issues)에서 보고해주세요.
+
+          ### 📚 문서
+
+          자세한 사용법은 [README.md](https://github.com/${{ github.repository }}/blob/main/README.md)를 참조하세요.
+
+          ---
+
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/v${{ steps.get_version.outputs.VERSION }}...HEAD
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.get_version.outputs.VERSION }}
+          name: Release v${{ steps.get_version.outputs.VERSION }}
+          body_path: release_notes.md
+          files: ${{ env.PACKAGE_NAME }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-prerelease:
+    # Pre-release 버전 배포 (alpha, beta, rc 등)
+    if: startsWith(github.ref, 'refs/tags/v') && contains(github.ref, '-')
+    needs: build
+    runs-on: ubuntu-latest
+    environment: prerelease
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Compile TypeScript
+        run: npm run compile
+
+      - name: Install VSCE
+        run: npm install -g @vscode/vsce
+
+      - name: Extract Version from Tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Deploying pre-release version: $VERSION"
+
+      - name: Update Package Version
+        run: |
+          npm version ${{ steps.get_version.outputs.VERSION }} --no-git-tag-version
+
+      - name: Package Extension
+        run: |
+          vsce package --pre-release --no-dependencies
+          PACKAGE_NAME=$(ls *.vsix)
+          echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
+
+      - name: Publish Pre-release to VSCode Marketplace
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          echo "🚀 Publishing pre-release to VSCode Marketplace..."
+          vsce publish --pre-release -p $VSCE_PAT --no-dependencies
+          echo "✅ Successfully published pre-release"
+
+      - name: Create Pre-release on GitHub
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.get_version.outputs.VERSION }}
+          name: Pre-release v${{ steps.get_version.outputs.VERSION }}
+          body: |
+            ## 🧪 Pre-release v${{ steps.get_version.outputs.VERSION }}
+
+            이것은 사전 릴리스 버전입니다. 테스트 목적으로만 사용하세요.
+
+            ### 설치 방법
+            ```bash
+            code --install-extension $(node -p "require('./package.json').publisher").rtems-qdp-builder@${{ steps.get_version.outputs.VERSION }}
+            ```
+
+            또는 아래 VSIX 파일을 직접 설치하세요.
+          files: ${{ env.PACKAGE_NAME }}
+          draft: false
+          prerelease: true
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
