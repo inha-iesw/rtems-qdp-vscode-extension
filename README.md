@@ -347,6 +347,16 @@ Extension UI에서 직접 프리셋을 저장하고 관리할 수 있습니다:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+### 커밋 메시지
+- 🎉: Begin a project.
+- ✨: Introduce new features.
+- ⚡️: Improve performance.
+- 🎨: Improve / Refactor the structure or format of the code.
+- 🐛: Fix a bug.
+- ✏️: Fix typos.
+- 📝: Add or Update the documentation / comments.
+- 🔥: Remove code or files.
+
 ## 📄 라이선스
 
 This project is licensed under the Apache 2.0 License
