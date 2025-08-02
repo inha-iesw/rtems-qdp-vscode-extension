@@ -43,7 +43,7 @@ jobs:
       - name: Package Extension
         run: |
           npm install -g @vscode/vsce
-          vsce package --no-dependencies
+          vsce package
 
       - name: Upload VSIX Artifact
         uses: actions/upload-artifact@v4
@@ -136,7 +136,7 @@ jobs:
 
       - name: Package Extension
         run: |
-          vsce package --no-dependencies
+          vsce package
           PACKAGE_NAME=$(ls *.vsix)
           echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
           echo "📦 Created package: $PACKAGE_NAME"
@@ -153,7 +153,7 @@ jobs:
           fi
 
           echo "🚀 Publishing to VSCode Marketplace..."
-          vsce publish -p $VSCE_PAT --no-dependencies
+          vsce publish -p $VSCE_PAT
           echo "✅ Successfully published to VSCode Marketplace"
 
       - name: Generate Release Notes
@@ -260,7 +260,7 @@ jobs:
 
       - name: Package Extension
         run: |
-          vsce package --pre-release --no-dependencies
+          vsce package --pre-release
           PACKAGE_NAME=$(ls *.vsix)
           echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
 
@@ -269,7 +269,7 @@ jobs:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
           echo "🚀 Publishing pre-release to VSCode Marketplace..."
-          vsce publish --pre-release -p $VSCE_PAT --no-dependencies
+          vsce publish --pre-release -p $VSCE_PAT
           echo "✅ Successfully published pre-release"
 
       - name: Create Pre-release on GitHub
