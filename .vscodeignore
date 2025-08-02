@@ -7,6 +7,9 @@ tsconfig.json
 .vscode/**
 .vscode-test/**
 node_modules/**
+!node_modules/js-yaml/**
+!node_modules/iconv-lite/**
+!node_modules/safer-buffer/**
 .gitignore
 .github/**
 
